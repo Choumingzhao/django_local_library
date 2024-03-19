@@ -1,8 +1,10 @@
+from typing import Any
 from django.shortcuts import render
-
+from django.views import generic
 # Create your views here.
 from .models import Book, Author, BookInstance, Genre
 
+# function based view
 def index(request):
     """View function for home page of site"""
     num_books = Book.objects.all().count()
@@ -24,3 +26,33 @@ def index(request):
         'num_books_with_word': num_books_with_word
     }
     return render(request, 'index.html', context=context)
+
+# class based view
+
+class BookListView(generic.ListView):
+    model = Book
+    paginate_by = 5
+    context_object_name = 'book_list'
+    # queryset = Book.objects.filter(title__icontains='of')[:5]
+    template_name = 'book_list.html'
+    def get_queryset(self):
+        return Book.objects.all()
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context['some data'] = 'This is just some data'
+        return context
+    
+class BookDetailView(generic.DetailView):
+    model = Book
+    template_name = 'book_detail.html'
+    
+class AuthorListView(generic.ListView):
+    model = Author
+    paginate_by = 5
+    context_object_name = 'author_list'
+    template_name = 'author_list.html'
+
+class AuthorDetailView(generic.DetailView):
+    model = Author
+    template_name = 'author_detail.html'
